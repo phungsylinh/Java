@@ -1,42 +1,33 @@
 pipeline {
     agent any
-
     stages {
-        stage('Matrix with Parallel') {
+        stage('Combined Example') {
             matrix {
                 axes {
                     axis {
-                        name 'OS'
-                        values 'linux', 'windows'
-                    }
-                    axis {
-                        name 'JDK'
-                        values '11', '17'
+                        name 'BROWSER'
+                        values 'Chrome', 'Firefox'
                     }
                 }
-
                 stages {
-                    stage('Parallel Tasks') {
-                        parallel {
-                            stage('Unit Test') {
-                                steps {
-                                    echo "Running Unit Test on ${OS} with JDK ${JDK}"
-                                    sh "echo unit test"
-                                }
-                            }
-
-                            stage('Integration Test') {
-                                steps {
-                                    echo "Running Integration Test on ${OS} with JDK ${JDK}"
-                                    sh "echo integration test"
-                                }
-                            }
-
-                            stage('Lint') {
-                                steps {
-                                    echo "Running Lint on ${OS} with JDK ${JDK}"
-                                    sh "echo lint"
-                                }
+                    stage('Parallel Tests') {
+                        steps {
+                            script {
+                                def parallelTests = [
+                                    "Unit Tests": {
+                                        node {
+                                            echo "Running Unit Tests on ${BROWSER}"
+                                            sh "echo Running Unit Tests on ${BROWSER}"
+                                        }
+                                    },
+                                    "Integration Tests": {
+                                        node {
+                                            echo "Running Integration Tests on ${BROWSER}"
+                                            sh "echo Running Integration Tests on ${BROWSER}"
+                                        }
+                                    }
+                                ]
+                                parallel parallelTests
                             }
                         }
                     }
