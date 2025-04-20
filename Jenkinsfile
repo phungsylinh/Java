@@ -1,54 +1,45 @@
 pipeline {
     agent any
+
     stages {
-        stage('Advanced Parallel Example') {
-            steps {
-                script {
-                    def parallelStages = [
-                        "Build": {
-                            node {
-                                try {
-                                    echo "Building the application"
-                                    // Simulate a build process
-                                    sh 'sleep 10'
-                                    echo "Build successful"
-                                } catch (Exception e) {
-                                    echo "Build failed: ${e.getMessage()}"
-                                    currentBuild.result = 'FAILURE'
-                                    throw e // Re-throw the exception to fail the stage
-                                }
-                            }
-                        },
-                        "Test": {
-                            node {
-                                try {
-                                    echo "Running tests"
-                                    // Simulate running tests
-                                    sh 'sleep 5'
-                                    echo "Tests passed"
-                                } catch (Exception e) {
-                                    echo "Tests failed: ${e.getMessage()}"
-                                    currentBuild.result = 'FAILURE'
-                                    throw e // Re-throw the exception to fail the stage
-                                }
-                            }
-                        },
-                        "Deploy": {
-                            node {
-                                // Conditional execution: only run if the branch is master
-                                when {
-                                    branch 'master'
-                                }
+        stage('Matrix with Parallel') {
+            matrix {
+                axes {
+                    axis {
+                        name 'OS'
+                        values 'linux', 'windows'
+                    }
+                    axis {
+                        name 'JDK'
+                        values '11', '17'
+                    }
+                }
+
+                stages {
+                    stage('Parallel Tasks') {
+                        parallel {
+                            stage('Unit Test') {
                                 steps {
-                                    echo "Deploying to production"
-                                    // Simulate deployment
-                                    sh 'sleep 2'
-                                    echo "Deployment completed"
+                                    echo "Running Unit Test on ${OS} with JDK ${JDK}"
+                                    sh "echo unit test"
+                                }
+                            }
+
+                            stage('Integration Test') {
+                                steps {
+                                    echo "Running Integration Test on ${OS} with JDK ${JDK}"
+                                    sh "echo integration test"
+                                }
+                            }
+
+                            stage('Lint') {
+                                steps {
+                                    echo "Running Lint on ${OS} with JDK ${JDK}"
+                                    sh "echo lint"
                                 }
                             }
                         }
-                    ]
-                    parallel parallelStages
+                    }
                 }
             }
         }
