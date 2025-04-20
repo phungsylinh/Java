@@ -1,11 +1,16 @@
-pipeline {
-  agent any
+@Library('shared-utils@main') _
+import com.example.MyHelper
 
-  stages {
-    stage('Test Trigger') {
-      steps {
-        echo "🎉 Jenkins đã được trigger từ GitHub push!"
-      }
+pipeline {
+    agent any
+    stages {
+        stage('Generate Random String') {
+            steps {
+                script {
+                    String randomString = MyHelper.generateRandomString(10)
+                    echo "Random String: ${randomString}"
+                }
+            }
+        }
     }
-  }
 }
