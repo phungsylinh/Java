@@ -11,6 +11,7 @@ metadata:
   labels:
     jenkins/jenkins-agent: "true"
 spec:
+  ttlSecondsAfterFinished: 600
   tolerations:
     - key: "node-role.kubernetes.io/control-plane"
       operator: "Exists"
@@ -42,16 +43,17 @@ spec:
     stages {
         stage('Check Agent') {
             steps {
-                sh 'echo "✅ Hello from Kubernetes Jenkins agent!"'
+                sh 'echo ✅ Hello from Kubernetes Jenkins agent!'
                 sh 'uname -a'
                 sh 'whoami'
+                sh 'env | grep JENKINS'
             }
         }
     }
 
     post {
         always {
-            echo '🧹 Cleaning up'
+            echo '🧹 Done - pod sẽ được giữ lại trong 10 phút để kiểm tra nếu cần.'
         }
     }
 }
